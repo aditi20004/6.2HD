@@ -2,22 +2,21 @@ pipeline {
     agent any
 
     tools {
-        // Specify the tools to auto-install and put on the PATH.
-        maven 'Maven' // Replace with your version of Maven
-        jdk 'jdk-17' // Replace with your JDK version
+        // Specify Maven and JDK versions configured in Jenkins' Global Tool Configuration
+        maven 'Maven'
+        jdk 'jdk-17'
     }
 
     environment {
-        // Define environment variables here.
+        // Define environment variables
         JAVA_HOME = "${tool 'jdk-17'}"
     }
 
     stages {
         stage('Initialize') {
             steps {
-                // Clean the workspace before starting the build
                 script {
-                    // This is useful when your project requires a clean environment before building
+                    // Cleanup workspace before starting a new build
                     deleteDir()
                 }
             }
@@ -25,15 +24,15 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                // Check out source code from a GitHub repository
+                // Check out the code from the Git repository
                 checkout scm
             }
         }
 
         stage('Build') {
             steps {
-                // Run the Maven build command
-                sh 'mvn clean package'
+                // Compile the code and package it using Maven
+                bat 'mvn clean package'
             }
             post {
                 success {
@@ -47,12 +46,12 @@ pipeline {
 
         stage('Test') {
             steps {
-                // Run tests using Maven
-                sh 'mvn test'
+                // Run unit tests using Maven
+                bat 'mvn test'
             }
             post {
                 always {
-                    // Archive the test results for Jenkins to display
+                    // Collect test results for display in Jenkins UI
                     junit '**/target/surefire-reports/TEST-*.xml'
                 }
                 success {
@@ -65,25 +64,24 @@ pipeline {
         }
 
         stage('Deploy') {
-            // This example assumes you might deploy to a staging environment
             steps {
                 echo 'Deploying application...'
-                // Add deployment scripts here, such as running scripts to deploy to servers or containers
-                sh './deploy.sh' // This is a placeholder; replace with your actual deployment script
+                // Here you would add commands to deploy your application
+                // For example, deploying a .war file to a server
+                // bat 'copy /Y path\\to\\your\\application.war path\\to\\deployment\\location'
             }
         }
 
         stage('Cleanup') {
             steps {
-                // Cleanup tasks if necessary
-                echo 'Cleaning up post build and deployment...'
+                // Perform cleanup if needed
+                echo 'Cleaning up...'
             }
         }
     }
 
     post {
         always {
-            // Actions to take in all pipeline runs, like sending notifications or cleaning up
             echo 'Pipeline execution complete.'
         }
     }
